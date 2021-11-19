@@ -1,0 +1,9 @@
+# File containing .env variables
+.env
+
+# Ignore Lib directory
+/Lib/
+
+# Log files
+ib_buffer_pool
+ibdata1

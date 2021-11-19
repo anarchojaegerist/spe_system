@@ -1,0 +1,53 @@
+<!-- templates/dashboard.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock title%}
+
+{% block content %}  
+<div class="heading">
+  <h1>Teaching Period - Units</h1>
+</div>
+<div class="tabs">
+  <button class="tablink" onclick="openPage('Home', this, 'red')" id="defaultOpen">Home</button>
+  <button class="tablink" onclick="openPage('SPE', this, 'red')" >SPE</button>
+  <button class="tablink" onclick="openPage('Class', this, 'red')">Class</button>
+</div>
+<div>
+  <div id="Home" class="tabcontent">
+    <h3>Home</h3>
+  </div>
+  
+  <div id="SPE" class="tabcontent">
+    <h3>SPE</h3>
+  </div>
+  
+  <div id="Class" class="tabcontent">
+    
+    <table class="tg">
+      <thead>
+        <tr>
+          <th class="tg-70gx">Semester</th>
+          <th class="tg-zv4m">Unit Code</th>
+          <th class="tg-zv4m">Unit Name</th>
+          <th class="tg-zv4m">Lecturer Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class=" tdh">TSD2021</td>
+          <td class="tg-0lax tdh">ICT302</td>
+          <td class="tg-0lax tdh">Final Project</td>
+          <td class="tg-0lax tdh">Mr Joseph</td>
+        </tr>
+        <tr>
+          <td class=""></td>
+          <td class=""></td>
+          <td class=""></td>
+          <td class=""></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock content %}
