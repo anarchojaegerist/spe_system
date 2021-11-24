@@ -1,0 +1,38 @@
+<!-- templates/campus_view.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+  <div class="container">
+    <div class="row">
+        <div class="col"><i class="fa fa-search"></i><input type="search" placeholder="Search"></div>
+    </div>
+    <div class="row">
+        {% for c in campuses %}
+            <div class="col">
+                <div class="row">
+                    <div class="col">
+                        <div class="d-md-flex justify-content-md-center align-items-md-center" style="width: 100%;height: 150px;position: relative;">
+                            <h1 style="position: relative;z-index: 1;color: red;">
+                                {{c.name}}
+                            </h1>
+                            <img class="img-fluid" style="width: 100%;height: 100%;position: absolute;" src="{% static 'img/campus-building.jpeg' %}">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col d-md-flex justify-content-md-center align-items-md-center" style="margin-top: 15px;">
+                        <a class="btn btn-primary" type="button" style="background: red;border-width: 1px;border-color: red;width: 100px;" href="{% url 'team_view' c.id %}">
+                            <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+  </div>
+
+
+{% endblock content %}

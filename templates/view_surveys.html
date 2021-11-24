@@ -10,14 +10,14 @@
     <div class="card">
       <div class="card-header">
         <span class="font-weight-bold">SPE Survey {{ s.id }}</span> &middot;
-        <span class="text-muted">by {{ user.title }} {{ user.given_names }} {{ user.last_name }}|
-        {{ s.date_modified }}</span>
+        <span class="text-muted">by {{ user.title }} {{ user.given_names }} {{ user.last_name }} |
+        Created on: {{ s.date_created }}</span>
       </div>
       <div class="card-body">
         {{ s.questions.count }} questions
       </div>
       <div class="card-footer text-center text-muted">
-        <a href="{% url 'edit-survey' s.id %}">Edit</a> | 
+        <a href="{% url 'edit_survey' s.id %}">Edit</a> | 
         <a href="#">Delete</a>
       </div>
     </div>

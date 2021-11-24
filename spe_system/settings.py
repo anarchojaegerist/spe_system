@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'bootstrap_modal_forms',
     'dashboard',
     'survey',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [

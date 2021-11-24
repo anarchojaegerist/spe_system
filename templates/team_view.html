@@ -1,0 +1,58 @@
+<!-- templates/team_view.html-->
+
+{% extends 'base.html' %}
+
+{% block title %}Teams{% endblock title %}
+
+{% block content %}
+  
+  {% if teams %}
+    <table class="tg">
+    <thead>
+        <tr>
+          <th class="tg-70gx">Team ID</th>
+          <th class="tg-zv4m">Team Number</th>
+          <th class="tg-zv4m">Team Name</th>
+          <th class="tg-zv4m">SPE 1</th>
+          <th class="tg-zv4m">SPE 2</th>
+          <th class="tg-zv4m"></th>
+        </tr>
+      </thead>
+    {% for t in teams %}
+      <tbody>
+          <tr>
+            <td class=" tdh">{{t.id}}</td>
+            <td class="tg-0lax tdh">{{t.team_number}}</td>
+
+            {% if t.team_name %}
+              <td class="tg-0lax tdh">{{s.given_names}}</td>
+            {% else %}
+              <td class="tg-0lax tdh">N/A</td>
+            {% endif %}
+
+            {% if spe1 %}
+              <td class="tg-0lax tdh">{{s.given_names}}</td>
+            {% else %}
+              <td class="tg-0lax tdh">N/A</td>
+            {% endif %}
+
+            {% if spe2 %}
+              <td class="tg-0lax tdh">{{s.given_names}}</td>
+            {% else %}
+              <td class="tg-0lax tdh">N/A</td>
+            {% endif %}
+            <div class="col d-md-flex justify-content-md-center align-items-md-center" style="margin-top: 15px;">
+              <a class="btn btn-primary" type="button" style="background: red;border-width: 1px;border-color: red;width: 100px;" href="{% url 'student_view' t.id %}">
+                  <i class="fa fa-arrow-right"></i>
+              </a>
+            </div>
+          </tr>
+      </tbody>
+    {% endfor %}
+    </table>
+
+    
+  {% else %}
+
+  {% endif %}
+{% endblock content %}

@@ -5,11 +5,11 @@ from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
-from bootstrap_modal_forms.generic import BSModalCreateView
+from bootstrap_modal_forms.generic import BSModalCreateView, BSModalDeleteView, BSModalUpdateView
 
 from .models import Question, Survey
 from accounts.models import Coordinator, User
-from .forms import CreateQuestionForm
+from .forms import QuestionModelForm
 import logging
 
 # Create your views here.
@@ -43,7 +43,8 @@ def edit_survey(request, pk):
     questions = s.questions.all()
     template_name = 'edit_survey.html'
     context = {
-        'questions':questions
+        'questions':questions,
+        'survey':s,
     }
     return render(request,'edit_survey.html',context)
 
@@ -53,10 +54,28 @@ class SurveyUpdateView(UpdateView): # new
     fields = ('spe_number', 'introductory_text', 'date_opened',
     'date_closed', 'questions')
     template_name = 'survey_edit.html'
+    success_message = 'Success: Question was created'
+    sucess_url = reverse_lazy('')
 
 
 class QuestionCreateView(BSModalCreateView):
-    template_name = 'examples/create_book.html'
-    form_class = CreateQuestionForm
+    template_name = 'create_question.html'
+    form_class = QuestionModelForm
     success_message = 'Success: Question created.'
     success_url = reverse_lazy('dashboard')
+
+
+class QuestionUpdateView(BSModalUpdateView):
+    model = Question
+    template_name = 'update_question.html'
+    form_class = QuestionModelForm
+    success_message = 'Success: Question was updated'
+    success_url = reverse_lazy('')
+
+
+class QuestionDeleteView(BSModalDeleteView):
+    model = Question
+    template_name = 'delete_question.html'
+    success_message = 'Success: Question was deleted'
+    success_url = reverse_lazy('')
+    

@@ -11,6 +11,24 @@ class UserManager(BaseUserManager):
     use_in_migrations = True
 
 
+    def create_inactive_user(self, email, **extra_fields):
+        """Create and save an 'inactive' User with an unusable password."""
+        if not email:
+            raise ValueError('The given email must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email, is_active=False, **extra_fields)
+        user.set_unusable_password()
+        user.save(using=self._db)
+        return user
+
+    def register_active_user(self, password, **extra_fields):
+        """Register an 'active' User with an unusable password."""
+
+        user = self.model(is_active=True, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
     def _create_user(self, email, password, **extra_fields):
         """Create and save a User with the given email and password."""
         if not email:

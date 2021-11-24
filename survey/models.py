@@ -65,11 +65,11 @@ class Evaluation(models.Model):
 
     student = models.ForeignKey(
         Student, on_delete=models.CASCADE, blank=False,
-        related_name='student_evaluating')
+        related_name='evaluations_by_student')
 
     evaluatee = models.ForeignKey(
         Student, on_delete=models.CASCADE, blank=False,
-        related_name='student_being_evaluated')
+        related_name='evaluations_by_peers')
 
 
 class Submission(models.Model):
@@ -78,8 +78,13 @@ class Submission(models.Model):
         """Metadata options for the Submission model."""
         db_table = 'submission'
     
-    evaluations = models.ManyToManyField(Evaluation)
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, blank=False,
+        related_name='submissions')
+
+    spe_number = models.PositiveSmallIntegerField()
     date_submitted = models.DateTimeField(auto_now_add=True)
+    evaluations = models.ManyToManyField(Evaluation)
 
 
 class Rating(models.Model):

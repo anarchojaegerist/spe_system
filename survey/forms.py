@@ -3,7 +3,7 @@ from bootstrap_modal_forms.forms import BSModalModelForm
 
 from .models import Comment, Question, Rating, Survey
 
-class CreateQuestionForm(BSModalModelForm):
+class QuestionModelForm(BSModalModelForm):
     class Meta:
         model = Question
         fields = '__all__'

@@ -5,7 +5,7 @@
 {% block title %}Student List{% endblock title %}
 
 {% block content %}
-  {% if student_data.count > 0 %}
+  {% if student_data.count <= 1 %}
     <form action="" method="POST" class="ui form" enctype="multipart/form-data">
       {% csrf_token %}
       {{form}}
@@ -35,40 +35,5 @@
       </tbody>
     </table>
   {% endif %}
-
-  <!-- Modal 
-    <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="uploadModalLabel">Modal title</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form action="" method="POST" class="ui form" enctype="multipart/form-data">
-              {% csrf_token %}
-              {{form}}
-              <button type="submit" class="ui button primary">Confirm</button>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-
-  <a href="https://icons8.com/icon/111975/csv">CSV icon by Icons8</a>
-  <script>
-    $('form .autosubmit').on('change', function() {
-        this.form.submit();
-    });
-  </script>
-  -->
 {% endblock content %}
 
