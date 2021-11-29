@@ -3,18 +3,16 @@ from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse_lazy
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.contrib import messages
 from django.db import transaction
 from bootstrap_modal_forms.generic import BSModalCreateView, BSModalDeleteView, BSModalUpdateView
 
 from .models import Question, Submission, Survey
 from accounts.models import Coordinator, Student, User
 from .forms import AddDuplicateQuestionForm, QuestionFormset, QuestionModelForm, SurveyModelForm
+from accounts.views import UserIsStudentMixin, UserIsCoordinatorMixin
 import logging
 
 # Create your views here.
@@ -30,22 +28,7 @@ def display_surveys(request):
     }
     return render(request, '../templates/view_surveys.html', context)
 
-class UserIsCoordinatorMixin:
 
-    def dispatch(self, request, *args, **kwargs):
-        if Coordinator.objects.filter(user_id = self.request.user.id):
-            return super().dispatch(request, *args, **kwargs)
-        else:
-            raise PermissionDenied
-
-
-class UserIsStudentMixin:
-
-    def dispatch(self, request, *args, **kwargs):
-        if Student.objects.filter(user_id = self.request.user.id):
-            return super().dispatch(request, *args, **kwargs)
-        else:
-            raise PermissionDenied
 
 
 class SurveyListView(UserIsCoordinatorMixin, LoginRequiredMixin, ListView):
@@ -75,6 +58,7 @@ class SurveyCreateView(LoginRequiredMixin, CreateView):
     template_name = 'create_survey.html'
     success_url = reverse_lazy('view_surveys')
     success_message = 'Success: Survey was created'
+    formset = QuestionFormset
 
     """
     def get_object(self, queryset=None):
@@ -90,13 +74,14 @@ class SurveyCreateView(LoginRequiredMixin, CreateView):
         return object
     """
 
+    
     def get_context_data(self, **kwargs):
         context = super(SurveyCreateView, self).get_context_data(**kwargs)
 
         if self.request.POST:
-            context['questions'] = QuestionFormset(self.request.POST)
+            context['questions'] = QuestionFormset(self.request.POST, instance=self.object)
         else:
-            context['questions'] = QuestionFormset()
+            context['questions'] = QuestionFormset(instance=self.object)
 
         return context
 

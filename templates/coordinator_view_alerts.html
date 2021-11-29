@@ -1,0 +1,21 @@
+<!-- templates/coordinator_view_alerts.html -->
+
+{% extends 'base.html' %}
+{% block title %}Alerts{% endblock title %}
+{% block content %}
+  {% for a in alert_data %}
+    <div class="card">
+      <div class="card-header">
+        <span class="font-weight-bold">{{ a.alert.title }}</span> &middot;
+        <span class="text-muted">by {{ a.user.given_names }} {{ a.user.last_name }}
+        | {{ a.alert.date_sent }}</span>
+      </div>
+      <div class="card-body">
+        <!-- Changes start here! -->
+        <a href="{% url 'coordinator_alert_detail_view' a.alert.id %}">View Alert</a>
+      </div>
+      <!-- Changes end here! -->
+    </div>
+    <br />
+  {% endfor %}
+{% endblock content %}

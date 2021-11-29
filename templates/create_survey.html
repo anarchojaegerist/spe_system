@@ -13,6 +13,8 @@
   {% csrf_token %}
   {{ form.as_p }}
   <div>
+    <table class="table">
+      {{ questions.as_p }}
     <table class="ts">
       <thead>
         <tr>

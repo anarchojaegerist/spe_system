@@ -17,7 +17,7 @@ class QuestionModelForm(ModelForm):
 
 
 QuestionFormset = inlineformset_factory(
-    Question, Survey.questions.through, form = QuestionModelForm
+    Survey, Survey.questions.through, form = QuestionModelForm, fields = '__all__'
 )
 
 class SurveyModelForm(ModelForm):

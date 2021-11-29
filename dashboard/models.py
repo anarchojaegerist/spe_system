@@ -22,12 +22,43 @@ class Alert(models.Model):
         blank=False,
         related_name='alerts')
 
-    message = models.CharField(max_length=1200)
+    title = models.CharField(max_length=60)
+    body = models.CharField(max_length=500, blank=True)
     date_sent = models.DateTimeField(auto_now_add=True)
     resolved = models.BooleanField()
 
     def __str__(self):
         return 'Alert #{} by Student {}'.format(self.id, self.student.id_number)
+
+
+class Message(models.Model):
+    class Meta:
+        """Metadata options for the Message model."""
+        db_table = 'message'
+
+    alert = models.ForeignKey(
+        Alert,
+        on_delete=models.CASCADE,
+        blank=False,
+        related_name='messages'
+    )
+
+    sender_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=False,
+        related_name='messages_sent',
+    )
+
+    receiver_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=False,
+        related_name='messages_received',
+    )
+
+    body = models.CharField(max_length=200)
+    date_sent = models.DateTimeField(auto_now_add=True)
 
 
 def user_directory_path(instance, filename):

@@ -1,17 +1,20 @@
 from django.http.response import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render
-from django.views.generic import TemplateView, ListView
+from django.shortcuts import get_object_or_404, render
+from django.views.generic import TemplateView, ListView, CreateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from datetime import datetime, date, time
 from decimal import Decimal, getcontext
+from django.urls.base import reverse_lazy
 
 from accounts.models import Coordinator, User, Student
-from dashboard.models import Campus, Report, Team, File, Offering
+from accounts.views import UserIsCoordinatorMixin, UserIsStudentMixin
+from django.views.generic.edit import FormView
+from .models import Campus, Report, Team, File, Offering, Alert, Message
 from survey.models import Question, Rating, Survey, Submission, Evaluation
-from .forms import CsvForm
+from .forms import CsvForm, ReplyForm
 import csv
 
 # Create your views here.
@@ -19,6 +22,63 @@ import csv
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard.html'
 
+
+class CoordinatorAlertListView(UserIsCoordinatorMixin, LoginRequiredMixin, ListView):
+    model = Alert
+    template_name = 'coordinator_view_alerts.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+
+        coordinator_object = Coordinator.objects.get(user_id = self.request.user.id)
+        alert_objects = coordinator_object.alerts.all()
+        context['alert_data'] = []
+
+        for a in alert_objects:
+            s = Student.objects.get(id = a.student_id)
+
+            alert_data_object = {
+                'alert': a,
+                'student': s,
+                'user': User.objects.get(id = s.user_id),
+            }
+
+            context['alert_data'].append(alert_data_object)
+
+        return context
+
+
+class CoordinatorAlertDetailView(UserIsCoordinatorMixin, LoginRequiredMixin, DetailView):
+    model = Alert
+    template_name = 'coordinator_detail_view_alert.html'
+
+    def get_object(self, queryset=None):
+        object = get_object_or_404(Alert, id=self.kwargs['alert_id'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+
+        alert_object = Alert.objects.get(id = self.kwargs['alert_id'])
+        student_object = Student.objects.get(id = alert_object.student_id)
+        context['alert'] = alert_object
+        context['student'] = student_object
+        context['student_user'] = User.objects.get(id = student_object.id)
+
+        return context
+
+class ReplyFormView(UserIsCoordinatorMixin, LoginRequiredMixin, FormView):
+    template_name = 'alert_reply.html'
+    form_class = ReplyForm
+    
+    def get_success_url(self):
+        return reverse_lazy('coordinator_alert_List_view')
+
+    def form_valid(self, form):
+        form.send_email()
+        return HttpResponseRedirect(reverse_lazy('coordinator_alert_list_view'))
+
+class MessageCreateView(LoginRequiredMixin, CreateView):
+    model = Message
 
 @login_required
 def campus_view(request):
