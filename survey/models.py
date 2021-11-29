@@ -11,7 +11,7 @@ class Question(models.Model):
         """Metadata options for the Question model."""
         db_table = 'question'
 
-
+    
     prompt = models.CharField(max_length=300, blank=False)
 
     weighting = models.DecimalField(
@@ -37,6 +37,9 @@ class Question(models.Model):
     evaluation_type = models.CharField(
         max_length=1, choices=EVALUATION_TYPE_CHOICES, blank=False)
 
+    def __str__(self):
+        return 'Question #{}: {}'.format(self.id, self.prompt)
+
 
 class Survey(models.Model):
     
@@ -48,14 +51,33 @@ class Survey(models.Model):
     coordinator = models.ForeignKey(Coordinator, on_delete=models.CASCADE, 
         blank=False, related_name='surveys')
 
-    spe_number = models.PositiveSmallIntegerField()
-    introductory_text = models.CharField(max_length=1600)
+    spe_number = models.PositiveSmallIntegerField(null=True)
+    introductory_text = models.CharField(max_length=1600, null=True)
     date_opened = models.DateTimeField(null=True)
     date_closed = models.DateTimeField(null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     questions = models.ManyToManyField(Question)
 
+
+class Submission(models.Model):
+    
+    class Meta:
+        """Metadata options for the Submission model."""
+        db_table = 'submission'
+    
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, blank=False,
+        related_name='submissions')
+
+    survey = models.ForeignKey(
+        Survey, on_delete=models.CASCADE, blank=False,
+        related_name='submissions')
+
+    spe_number = models.PositiveSmallIntegerField()
+    date_submitted = models.DateTimeField(null=True)
+    is_submitted = models.BooleanField(default=False)
+    
 
 class Evaluation(models.Model):
     
@@ -71,20 +93,9 @@ class Evaluation(models.Model):
         Student, on_delete=models.CASCADE, blank=False,
         related_name='evaluations_by_peers')
 
-
-class Submission(models.Model):
-    
-    class Meta:
-        """Metadata options for the Submission model."""
-        db_table = 'submission'
-    
-    student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, blank=False,
-        related_name='submissions')
-
-    spe_number = models.PositiveSmallIntegerField()
-    date_submitted = models.DateTimeField(auto_now_add=True)
-    evaluations = models.ManyToManyField(Evaluation)
+    submission = models.ForeignKey(
+        Submission, on_delete=models.CASCADE, blank=False,
+        related_name='evaluations')
 
 
 class Rating(models.Model):

@@ -7,3 +7,6 @@
 # Log files
 ib_buffer_pool
 ibdata1
+
+# Ignore media directory
+/media/

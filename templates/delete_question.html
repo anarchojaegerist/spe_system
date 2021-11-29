@@ -1,24 +1,22 @@
 <!-- templates/delete_question.html -->
 
-{% load widget_tweaks %}
+<form method="post">{% csrf_token %}
+<p>Are you sure you want to delete the selected Question with the following attributes:</p>
+  <ul>
+    <li>Question ID: {{ question.id }}</li>
+    <li>Question Prompt: {{ question.prompt }}</li>
+    <li>Question Weighting: {{ question.weighting }}</li>
+    {% if question.question_type == 'C' %}
+      <li>Question Type: Comment</li>
+    {% elif question.question_type == 'R' %}
+      <li>Question Type: Rating</li>
+    {% endif %}
 
-<form method="post" action="">
-  {% csrf_token %}
-
-  <div class="modal-header">
-    <h3 class="modal-title">Delete Question</h3>
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-
-  <div class="modal-body">
-    <p>Are you sure you want to delete question with id
-      <strong>{{ question.id }}</strong>?</p>
-  </div>
-
-  <div class="modal-footer">
-    <button type="submit" class="btn btn-danger">Delete</button>
-  </div>
-
+    {% if question.evaluation_type == 'S' %}
+      <li>Evaluation Type: Self Evaluation</li>
+    {% elif question.evaluation_type == 'P' %}
+      <li>Evaluation Type: Peer Evaluation</li>
+    {% endif %}
+  </ul>
+  <input type="submit" value="Confirm">
 </form>

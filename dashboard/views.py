@@ -1,13 +1,16 @@
-from django.http.response import HttpResponseRedirect
+from django.http.response import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
+from datetime import datetime, date, time
+from decimal import Decimal, getcontext
 
 from accounts.models import Coordinator, User, Student
-from dashboard.models import Campus, Team, File, Offering
-from survey.models import Survey, Submission, Evaluation
+from dashboard.models import Campus, Report, Team, File, Offering
+from survey.models import Question, Rating, Survey, Submission, Evaluation
 from .forms import CsvForm
 import csv
 
@@ -57,9 +60,6 @@ def team_view(request, pk):
                 )
             except ObjectDoesNotExist:
                 pass
-
-    print(len(spe1))
-    print(len(spe2))
     
     context = {
         'teams': teams,
@@ -75,22 +75,31 @@ def student_view(request, pk):
 
     # List of dictionaries containing: 1) Student object 2) SPE Submissions, if any
     student_data = []
+    spe_closed = False # Boolean representing whether at least one SPE has been closed (usually the first one)
 
     t = Team.objects.get(id = pk)
     
     for s in t.students.all():
-        print(len(student_data))
         # Student dictionary containing student details and SPE submissions
         add_student = {
             'student': s,
             'user': User.objects.get(id = s.user_id)}
         
         # Check if student has submitted SPE 1
-        if Submission.objects.all().filter(
-            spe_number = 1,
-            student_id = s.id
-        ).exists():
-            add_student['spe_1'] = True
+        if Submission.objects.all().filter(spe_number = 1, student_id = s.id).exists():
+                add_student['spe_1'] = True
+                # Check if SPE 1 has closed
+
+                submission = Submission.objects.get(
+                    spe_number = 1,
+                    student_id = s.id
+                )
+
+                survey = Survey.objects.get(id = submission.survey_id)
+
+                if survey.date_closed is not None and survey.date_closed < timezone.make_aware(datetime.utcnow()):
+                    spe_closed = True
+
         else:
             add_student['spe_1'] = False
 
@@ -104,10 +113,94 @@ def student_view(request, pk):
             add_student['spe_2'] = False
 
         student_data.append(add_student)
-        
-    print(len(student_data))
-    return render(request, 'student_view.html', {'student_data': student_data})
 
+        context = {
+            'student_data': student_data,
+            'spe_closed': spe_closed,
+            'team': t
+        }
+
+    return render(request, 'student_view.html', context)
+
+def report_directory_path(request, pk):
+    # The given report csv will be stored at MEDIA_ROOT/user_<id>/<filename>
+    coordinator = Coordinator.objects.get(user_id = request.user.id)
+    count = Report.objects.filter(coordinator_id = coordinator.id).count()
+    return 'user_{0}/Report{1}'.format(request.user.id, count+1)
+
+def create_team_report(request, pk):
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="{}.csv"'.format(report_directory_path(request, pk))},
+    )
+
+    t = Team.objects.get(id = pk)
+
+    writer = csv.writer(response)
+    writer.writerow(['Person ID', 'Surname', 'Title', 'Given Names', 
+    'Teach Period', 'Unit Code', 'Team ID', 'Team Name', 'SPE1', 'SPE2'])
+    for s in t.students.all():
+        getcontext().prec = 2
+        spe1 = 0
+        spe2 = 0
+        spe_sum = 0
+        rating_count = 0
+        evaluation_count = 0
+
+        u = User.objects.get(id = s.user_id)
+        # Check if Student has submitted SPE1
+        if Submission.objects.filter(student_id=s.id, spe_number=1).exists():
+            # If student has submitted SPE1, loop through evaluations of student (including self-evaluation) to calculate SPE1 mark
+            evaluations = Evaluation.objects.filter(evaluatee_id=s.id)
+            for e in evaluations:
+                evaluation_count += 1
+                ratings = Rating.objects.filter(evaluation_id = e.id)
+                for r in ratings:
+                    q = Question.objects.get(id = r.question_id)
+                    weighting = q.weighting
+
+                    rating_count += 1
+                    spe_sum += float(r.answer * weighting)
+                    print(f"SPE SUM {spe_sum} ANSWER {r.answer * weighting}")
+            
+            spe1 = ((spe_sum) / (rating_count))
+            # print(f"SPE Sum: {spe_sum} Rating count: {rating_count}")
+            print(spe1)
+        else:
+            spe1 = 0
+        
+        spe_sum = 0
+        rating_count = 0
+
+        # Check if Student has submitted SPE2
+        if Submission.objects.filter(student_id=s.id, spe_number=2).exists():
+            # If student has submitted SPE2, loop through evaluations of student (including self-evaluation) to calculate SPE2 mark
+            evaluations = Evaluation.objects.filter(evaluatee_id=s.id)
+            for e in evaluations:
+                ratings = Rating.objects.filter(evaluation_id = e.id)
+                for r in ratings:
+                    q = Question.objects.get(id = r.question_id)
+                    weighting = q.weighting
+                    rating_count += 1
+                    spe_sum += Decimal(r.answer) * Decimal(weighting)
+            spe2 = Decimal(spe_sum) / Decimal(rating_count)
+        else:
+            spe2 = 0
+
+        writer.writerow([s.id_number, u.last_name, u.title, u.given_names, 
+        t.offering.teaching_period, t.offering.unit_code, 
+        t.team_number, t.team_name, spe1, spe2])
+
+    report_csv = Report.objects.create(
+        coordinator_id = Coordinator.objects.get(user_id = request.user.id).id
+        )
+
+    return response
+
+class AllStudentsListView(ListView):
+    def get(request):
+        print()
 
 @login_required
 def student_list(request):
@@ -116,7 +209,7 @@ def student_list(request):
 
     # List of dictionaries - each dictionary contains data for a given
     # student from both the Student and User models.
-    student_data = [] 
+    student_data = [{}] 
 
     # Get coordinator ID using current user's ID
     coordinator_object = Coordinator.objects.get(user_id = request.user.id)
@@ -195,7 +288,6 @@ def student_list(request):
                     tp_city = ''
                     tp_country = ''
 
-                    print(tp)
                     if tp == "TJA" or tp == "TMA" or tp == "TSA":
                         tp_name = 'Murdoch University International Study Centre Singapore'
                         tp_city = 'Singapore'
@@ -229,11 +321,12 @@ def student_list(request):
                     t, create = Team.objects.get_or_create(
                         team_number = csv_team_number,
                         team_name = csv_team_name,
-                        campus = c,)
+                        campus = c,
+                        offering = o,)
                     t.students.add(s)
 
             obj.save()
-
+    
     return render(request, 'student_list.html', {'form': form, 'student_data': student_data})
 
 

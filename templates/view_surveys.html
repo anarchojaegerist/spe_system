@@ -17,9 +17,11 @@
         {{ s.questions.count }} questions
       </div>
       <div class="card-footer text-center text-muted">
-        <a href="{% url 'edit_survey' s.id %}">Edit</a> | 
-        <a href="#">Delete</a>
+        <a href="{% url 'update_survey_questions' s.id %}">Edit Survey Details</a> | 
+        <a href="{% url 'update_survey_questions' s.id %}">Edit Survey Questions</a> | 
+        <a href="#">Delete Survey</a>
       </div>
     </div>
   {% endfor %}
+  <a class="btn btn-primary" type="button" href="{% url 'create_survey' %}">Add Survey</a>
 {% endblock content %}

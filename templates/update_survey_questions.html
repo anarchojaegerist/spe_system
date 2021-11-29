@@ -1,0 +1,75 @@
+<!-- templates/update_survey_questions.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Survey Update{% endblock title %}
+
+{% block content %}
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div>
+      <table class="ts">
+        <thead>
+          <tr>
+            <th class="ts-70gx">Question</th>
+            <th class="ts-zv4m">Question Type</th>
+            <th class="ts-zv4m">Weighting</th>
+            <th class="ts-zv4m">Evaluation Type</th>
+            <th class="ts-zv4m"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for q in questions %}
+            {% if q.evaluation_type == 'S' %}
+              <tr>
+                <td class=" tdh">{{q.prompt}}</td>
+                <td class="ts-0lax tdh">{{q.question_type}}</td>
+
+                {% if q.question_type == 'C' %}
+                  <td class="ts-0lax tdh">N/A</td>
+                {% else %}
+                  <td class="ts-0lax tdh">{{q.weighting}}</td>
+                {% endif %}
+                <td class="ts-0lax tdh">{{q.evaluation_type}}</td>
+
+                <td class="ts-0lax tdh">
+                  <a class="btn btn-sm btn-primary" href="{% url 'update_question' survey_id=survey.id question_id=q.id %}">Edit</a>
+                  <a class="btn btn-sm btn-danger" href="{% url 'delete_question' survey_id=survey.id question_id=q.id %}">Remove</a>
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+
+          {% for q in questions %}
+            {% if q.evaluation_type == 'P' %}
+              <tr>
+                <td class=" tdh">{{q.prompt}}</td>
+                <td class="ts-0lax tdh">{{q.question_type}}</td>
+
+                {% if q.question_type == 'C' %}
+                  <td class="ts-0lax tdh">N/A</td>
+                {% else %}
+                  <td class="ts-0lax tdh">{{q.weighting}}</td>
+                {% endif %}
+                <td class="ts-0lax tdh">{{q.evaluation_type}}</td>
+
+                <td class="ts-0lax tdh">
+                  <a class="btn btn-sm btn-primary" href="{% url 'update_question' survey_id=survey.id question_id=q.id %}">Edit</a>
+                  <a class="btn btn-sm btn-danger" href="{% url 'delete_question' survey_id=survey.id question_id=q.id %}">Remove</a>
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+
+        </tbody>
+      </table>
+      <a class="btn btn-primary" type="button" href="{% url 'create_question' survey.id %}">Add Question</a>
+      <a class="btn btn-primary" type="button" href="{% url 'add_duplicate_question' survey.id %}">Add Duplicate Question</a>
+    </div>
+    <input type="submit" value="Submit">
+  </form>
+
+{% endblock content %}

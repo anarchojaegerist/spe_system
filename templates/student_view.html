@@ -1,6 +1,10 @@
 <!-- templates/student_view.html -->
 
 {% block content %}
+  
+{% if spe_closed %}
+  <a class="btn btn-primary" type="button" href="{% url 'create_team_report' team.id %}">Generate Report</a>
+{% endif %}
 <table class="tg">
 	<thead>
 	<tr>
@@ -27,7 +31,6 @@
 			{% else %}
 				<td class="tg-0lax tdh">No</td>
 			{% endif %}
-			
 			</tr>
 		{% endfor %}
 	</tbody>

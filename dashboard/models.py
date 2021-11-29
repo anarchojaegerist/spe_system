@@ -26,6 +26,9 @@ class Alert(models.Model):
     date_sent = models.DateTimeField(auto_now_add=True)
     resolved = models.BooleanField()
 
+    def __str__(self):
+        return 'Alert #{} by Student {}'.format(self.id, self.student.id_number)
+
 
 def user_directory_path(instance, filename):
     # The given file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
@@ -59,6 +62,9 @@ class File(models.Model):
     type = models.CharField(
         max_length=12, choices=FILE_TYPE_CHOICES, blank=False)
 
+    def __str__(self):
+        return 'File #{} of type {}'.format(self.id, self.type)
+
 
 class Campus(models.Model):
     
@@ -69,6 +75,9 @@ class Campus(models.Model):
     name = models.CharField(max_length=80, blank=False)
     city = models.CharField(max_length=20, blank=False)
     country = models.CharField(max_length=40, blank=False)
+
+    def __str__(self):
+        return 'Campus #{}: {}'.format(self.id, self.name)
 
 
 class Offering(models.Model):
@@ -98,6 +107,7 @@ class Offering(models.Model):
     students = models.ManyToManyField(Student)
 
 
+
 class Team(models.Model):
     class Meta:
         """Metadata options for the Team model."""
@@ -108,6 +118,12 @@ class Team(models.Model):
 
     campus = models.ForeignKey(
         Campus, 
+        on_delete=models.CASCADE, 
+        null=True,
+        related_name='teams')
+
+    offering = models.ForeignKey(
+        Offering, 
         on_delete=models.CASCADE, 
         null=True,
         related_name='teams')
@@ -128,4 +144,3 @@ class Report(models.Model):
 
     date_generated = models.DateTimeField(auto_now_add=True)
 
-    students = models.ManyToManyField(Student)
