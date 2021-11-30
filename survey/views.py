@@ -1,6 +1,8 @@
+from django.forms.models import modelformset_factory
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse_lazy
+from django.views.generic.base import TemplateView
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -11,6 +13,7 @@ from bootstrap_modal_forms.generic import BSModalCreateView, BSModalDeleteView, 
 
 from .models import Question, Submission, Survey
 from accounts.models import Coordinator, Student, User
+from dashboard.models import Offering, Team
 from .forms import AddDuplicateQuestionForm, QuestionFormset, QuestionModelForm, SurveyModelForm
 from accounts.views import UserIsStudentMixin, UserIsCoordinatorMixin
 import logging
@@ -58,30 +61,17 @@ class SurveyCreateView(LoginRequiredMixin, CreateView):
     template_name = 'create_survey.html'
     success_url = reverse_lazy('view_surveys')
     success_message = 'Success: Survey was created'
-    formset = QuestionFormset
-
-    """
-    def get_object(self, queryset=None):
-        # Generate autoid
-        last_survey = Survey.objects.latest('id')
-        auto_id = last_survey.id + 1
-
-        # Get coordinator
-        coordinator_obj = Coordinator.objects.get(user_id = self.request.user.id)
-
-        object = Survey(id = auto_id, coordinator_id = coordinator_obj.id)
-
-        return object
-    """
-
+    QuestionFormset = modelformset_factory(Question, form=QuestionModelForm, extra=3)
     
     def get_context_data(self, **kwargs):
         context = super(SurveyCreateView, self).get_context_data(**kwargs)
 
         if self.request.POST:
-            context['questions'] = QuestionFormset(self.request.POST, instance=self.object)
+            context['questions'] = QuestionFormset(queryset=Question.objects.none())
+            # context['questions'] = QuestionFormset(self.request.POST, instance=self.object)
         else:
             context['questions'] = QuestionFormset(instance=self.object)
+            # context['questions'] = QuestionFormset(instance=self.object)
 
         return context
 
@@ -90,7 +80,10 @@ class SurveyCreateView(LoginRequiredMixin, CreateView):
         questions = context['questions']
 
         with transaction.atomic():
-            self.object = form.save()
+            coordinator_object = Coordinator.objects.get(user_id = self.request.user.id)
+            print(form)
+            self.object = form.save(commit=False)
+            self.object.coordinator_id = coordinator_object.id
 
             if questions.is_valid():
                 questions.instance = self.object
@@ -98,22 +91,6 @@ class SurveyCreateView(LoginRequiredMixin, CreateView):
             
         return super(SurveyCreateView, self).form_valid(form)
 
-    """
-    def post(self, request, *args, **kwargs):
-        context = self.get_context_data()
-        form = self.form_class(request.POST)
-        s = self.get_object()
-        print(f"Survey ID at post(): {s.id}")
-
-        if s.questions.count() > 1:
-            if form.is_valid():
-                return HttpResponseRedirect(reverse('view_surveys'))
-            else:
-                return HttpResponseRedirect(reverse('create_survey'))
-        else: 
-            messages.error(request, "Error: A survey must have at least 1 question.")
-            return HttpResponseRedirect(reverse('create_survey'))
-    """
 
 class SurveyUpdateQuestionsView(LoginRequiredMixin, UpdateView): 
     
@@ -321,8 +298,64 @@ class AddDuplicateQuestionView(LoginRequiredMixin, UpdateView):
 
     
 class StudentSurveyListView(LoginRequiredMixin, UserIsStudentMixin, ListView):
+    model = Survey
+    template_name = 'student_survey_list_view.html'
+
+    """
+    def get_queryset(self):
+        student_object = Student.objects.get(user_id = self.request.user.id)
+        offering_object = Offering.objects.none()
+
+        for o in Offering.objects.all():
+            if student_object in o.students.all():
+                offering_object = o
+                
+        return Survey.offerings.filter(offering_id = offering_object.id)
+    """
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        student_object = Student.objects.get(user_id = self.request.user.id)
+        offering_object = Offering.objects.none()
+
+        for o in Offering.objects.all():
+            if o.unit_code == 'ICT302' and student_object in o.students.all():
+                offering_object = o 
+                break
+
+        context['user'] = self.request.user
+        context['offering'] = offering_object
+        context['surveys'] = offering_object.surveys.all()
+        return context
+
+
+class SurveyIntroView(LoginRequiredMixin, UserIsStudentMixin, TemplateView):
+    model = Survey
+    template_name = 'survey_intro.html'
     print()
 
+    def get_context_data(self):
+        context = super().get_context_data()
+        team_members = []
+        student_object = Student.objects.get(user_id = self.request.user.id)
+        team_object = Team.objects.none()
+        survey_object = Survey.objects.get(id = self.kwargs['survey_id'])
+
+        for t in Team.objects.all():
+            if student_object in t.students.all():
+                team_object = t
+
+        for member in team_object.students.all():
+            member_user = User.objects.get(id = member.user_id)
+            team_members.append({
+                'given_names': member_user.given_names,
+                'last_name': member_user.last_name
+            })
+
+        context['survey'] = survey_object
+        context['members'] = team_members
+
+        return context
 
 class SubmissionCreateView(LoginRequiredMixin, UserIsStudentMixin, CreateView):
     model = Submission

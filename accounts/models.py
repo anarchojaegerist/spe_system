@@ -91,7 +91,6 @@ class Student(models.Model):
     id_number = models.CharField(max_length=8, blank=False)
     spe1 = models.DecimalField(max_digits=4, decimal_places=2, null=True)
     spe2 = models.DecimalField(max_digits=4, decimal_places=2, null=True)
-    
     REQUIRED_FIELDS = []
 
 

@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.deletion import CASCADE
 from django.db.models.constraints import UniqueConstraint
 from accounts.models import Student, Coordinator
+from dashboard.models import Offering
 
 # Create your models here.
 
@@ -52,12 +53,14 @@ class Survey(models.Model):
         blank=False, related_name='surveys')
 
     spe_number = models.PositiveSmallIntegerField(null=True)
+    title = models.CharField(max_length=60)
     introductory_text = models.CharField(max_length=1600, null=True)
     date_opened = models.DateTimeField(null=True)
     date_closed = models.DateTimeField(null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    questions = models.ManyToManyField(Question)
+    questions = models.ManyToManyField(Question, related_name='surveys')
+    offerings = models.ManyToManyField(Offering, related_name='surveys')
 
 
 class Submission(models.Model):

@@ -135,7 +135,7 @@ class Offering(models.Model):
     teaching_period = models.CharField(max_length=3, blank=False)
     year = models.PositiveSmallIntegerField(blank=False)
 
-    students = models.ManyToManyField(Student)
+    students = models.ManyToManyField(Student, related_name='offerings')
 
 
 
@@ -159,7 +159,7 @@ class Team(models.Model):
         null=True,
         related_name='teams')
 
-    students=models.ManyToManyField(Student)
+    students=models.ManyToManyField(Student, related_name='teams')
 
 class Report(models.Model):
     
