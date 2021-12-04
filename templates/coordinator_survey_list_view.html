@@ -1,6 +1,6 @@
 <!-- templates/coordinator_survey_list_view.html-->
 
-{% extends 'base.html' %}
+{% extends 'coordinator_base.html' %}
 
 {% block title %}Surveys{% endblock title %}
 
@@ -17,9 +17,10 @@
         {{ s.questions.count }} questions
       </div>
       <div class="card-footer text-center text-muted">
-        <a href="{% url 'update_survey_questions' s.id %}">Edit Survey Details</a> | 
-        <a href="{% url 'update_survey_questions' s.id %}">Edit Survey Questions</a> | 
-        <a href="#">Delete Survey</a>
+        <a href="{% url 'update_survey' s.id %}">Edit Survey</a> | 
+        <a href="{% url 'create_question' s.id %}">Add New Question</a> | 
+        <a href="{% url 'delete_survey' s.id %}">Delete Survey</a> |
+        <a href="{% url 'delete_survey' s.id %}">Activate Survey</a> |
       </div>
     </div>
   {% endfor %}

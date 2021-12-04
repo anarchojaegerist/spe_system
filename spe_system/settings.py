@@ -11,8 +11,14 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from environs import Env
 from decouple import config
+import dj_database_url
 import os
+
+env = Env()
+env.read_env()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -81,16 +87,20 @@ WSGI_APPLICATION = 'spe_system.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
+    
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'spe_system',
-        'USER': 'root',
-        'PASSWORD': 'R$Iwmtftp1!T',
+        'USER': config("DB_USER"),
+        'PASSWORD': config("DB_PASSWORD"),
         'HOST': 'localhost',
         'PORT': '3306'
     }
 }
 
+DATABASES = {
+    "default": env.dj_db_url("DATABASE_URL")
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

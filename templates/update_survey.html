@@ -12,17 +12,22 @@
 <form method="POST" enctype="multipart/form-data" id="survey-form">
   {% csrf_token %}
   {{ form.as_p }}
-  {{ formset.management_form }}
-  {% for q in questions %}
+  {{ questions.management_form }}
+  {% for f in questions.forms %}
   <div class="question-form d-flex justify-content-between">
-    {{ q.as_p }}
+    {{ f.as_p }}
     <button class="align-self-center btn btn-danger delete-question-form">Delete</button>
   </div>
   {% endfor %}
 
   <input type="submit" name="submit" value="Submit" class="btn btn-primary" />
   <button id="add-question-form" class="btn btn-primary my-3">Add A Duplicate Question</button>
+  
 </form>
+
+
+    
+    
 {% endblock %}
 {% block extra_js %}
   <script>
@@ -34,12 +39,18 @@
 
     let formCount = questionForm.length - 1;
 
+    function updateForms() {
+      let count = 0;
+      for (let form of questionForm) {
+          const formRegex = RegExp(`form-(\\d){1}-`, 'g');
+          form.innerHTML = form.innerHTML.replace(formRegex, `form-${count++}-`)
+      }
+    }
+
     addQuestionFormBtn.addEventListener("click", function (event) {
       event.preventDefault();
-      
       // Clone new question form
       const newQuestionForm = questionForm[0].cloneNode(true);
-      console.log(newQuestionForm)
       const formRegex = RegExp('form-(//d){1}-', 'g');
       formCount++;
 
@@ -54,6 +65,7 @@
         event.preventDefault();
         event.target.parentElement.remove();
         formCount--;
+        updateForms();
         totalForms.setAttribute('value', '${formCount + 1}');
       }
     })

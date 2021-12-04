@@ -1,38 +1,70 @@
 <!-- templates/student_view.html -->
-
+{% extends 'coordinator_base.html' %}
 {% block content %}
-  
+{% if spe_closed %}
+	<div class="row">
+		<div class="col"><button class="btn btn-primary" type="button" style="font-size: 20px;background: grey;border-color: grey;">Report&nbsp;<i class="fas fa-file-csv" style="margin: 10px;"></i></button><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="none" style="font-size: 30px;margin: 10px;">
+
+				<path d="M10 2C7.23858 2 5 4.23858 5 7V9C3.89543 9 3 9.89543 3 11V16C3 17.1046 3.89543 18 5 18H15C16.1046 18 17 17.1046 17 16V11C17 9.89543 16.1046 9 15 9H7V7C7 5.34315 8.34315 4 10 4C11.3965 4 12.5725 4.95512 12.9055 6.24926C13.0432 6.78411 13.5884 7.1061 14.1232 6.96844C14.6581 6.83078 14.9801 6.28559 14.8424 5.75074C14.2874 3.59442 12.3312 2 10 2Z" fill="currentColor"></path>
+			</svg></div>
+		<div class="col d-lg-flex justify-content-lg-end"><button class="btn btn-primary" type="button" style="border-color: red;background: red;font-size: 16px;margin: 5px;">Back&nbsp;&nbsp;<i class="fa fa-long-arrow-left"></i>&nbsp;</button><button class="btn btn-primary" type="button" style="color: white;font-size: 16px;background: red;border-color: red;margin: 5px;">Dashboard&nbsp;&nbsp;<i class="fa fa-dashboard"></i>&nbsp;</button></div>
+	</div>
+{% endif %}
+<div class="row">
+	<div class="col">
+		<div class="container">
+			<div class="row" style="padding-top: 25px;padding-bottom: 15px;border-bottom-width: 1px;border-bottom-color: rgb(177,179,180);">
+				<div class="col-1" style="padding: 0px;"></div>
+				<div class="col-2">
+					<h1 class="text-start" style="font-size: 20px;">Student ID</h1>
+				</div>
+				<div class="col-2">
+					<h1 class="text-start" style="font-size: 20px;">Name</h1>
+				</div>
+				<div class="col-2">
+					<h1 class="text-start" style="font-size: 20px;">SPE 1</h1>
+				</div>
+				<div class="col-2">
+					<h1 class="text-start" style="font-size: 20px;">SPE 2</h1>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="container">
+	{% for s in student_data %}
+		<div class="row">
+			<div class="col-1" style="padding: 0px;"><button class="btn btn-primary" type="button" style="background: transparent;border-color: transparent;border-bottom-width: 0px;border-bottom-color: transparent;"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" style="color: black;">
+						<path fill-rule="evenodd" clip-rule="evenodd" d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4Z" fill="currentColor"></path>
+						<path fill-rule="evenodd" clip-rule="evenodd" d="M13 7C13 6.44772 12.5523 6 12 6C11.4477 6 11 6.44772 11 7V11H7C6.44772 11 6 11.4477 6 12C6 12.5523 6.44772 13 7 13H11V17C11 17.5523 11.4477 18 12 18C12.5523 18 13 17.5523 13 17V13H17C17.5523 13 18 12.5523 18 12C18 11.4477 17.5523 11 17 11H13V7Z" fill="currentColor"></path>
+					</svg></button></div>
+			<div class="col-2 d-flex justify-content-center align-items-center justify-content-lg-start">
+				<h1 style="font-size: 16px;margin: 0px;">{{ s.student.id_number }}</h1>
+			</div>
+			<div class="col-2 d-flex justify-content-center align-items-center justify-content-lg-start">
+				<h1 style="font-size: 16px;margin: 0px;">{{ s.user.given_names}} {{s.user.last_name}}</h1>
+			</div>
+			<div class="col-2 d-flex justify-content-center align-items-center justify-content-lg-start">
+				{% if s.spe_1 == True %}
+					<h1 style="font-size: 16px;margin: 0px;">Yes</h1>
+				{% else %}
+				<h1 style="font-size: 16px;margin: 0px;">No</h1>
+				{% endif %}
+			</div>
+			<div class="col-2 d-flex justify-content-center align-items-center justify-content-lg-start">
+				{% if s.spe_2 == True %}
+					<h1 style="font-size: 16px;margin: 0px;">Yes</h1>
+				{% else %}
+				<h1 style="font-size: 16px;margin: 0px;">No</h1>
+				{% endif %}
+			</div>
+			<div class="col-2 d-flex justify-content-center align-items-center justify-content-lg-start"></div>
+			<div class="col-2 d-flex justify-content-center align-items-center justify-content-lg-start"></div>
+		</div>
+	{% endfor %}
+</div>
+
 {% if spe_closed %}
   <a class="btn btn-primary" type="button" href="{% url 'create_team_report' team.id %}">Generate Report</a>
 {% endif %}
-<table class="tg">
-	<thead>
-	<tr>
-		<th class="tg-70gx">Student ID</th>
-		<th class="tg-zv4m">Name</th>
-		<th class="tg-zv4m">SPE 1</th>
-		<th class="tg-zv4m">SPE 2</th>
-	</tr>
-	</thead>
-	<tbody>
-		{% for s in student_data %}
-			<tr>
-			<td class=" tdh">{{s.student.id_number}}</td>
-			<td class="tg-0lax tdh">{{s.user.given_names}} {{s.user.last_name}}</td>
-
-			{% if s.spe_1 == True %}
-				<td class="tg-0lax tdh">Yes</td>
-			{% else %}
-				<td class="tg-0lax tdh">No</td>
-			{% endif %}
-
-			{% if s.spe_2 == True %}
-				<td class="tg-0lax tdh">Yes</td>
-			{% else %}
-				<td class="tg-0lax tdh">No</td>
-			{% endif %}
-			</tr>
-		{% endfor %}
-	</tbody>
-</table>
 {% endblock content %}

@@ -1,5 +1,6 @@
 <!-- templates/create_question.html -->
-
+{% extends 'coordinator_base.html' %}
+{% block content %}
 <form method="post" action="">
   {% csrf_token %}
 
@@ -27,3 +28,4 @@
     <button type="submit" class="btn btn-primary">Create</button>
   </div>
 </form>
+{% endblock content %}

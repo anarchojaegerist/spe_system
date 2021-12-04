@@ -11,16 +11,27 @@ from django.urls.base import reverse_lazy
 
 from accounts.models import Coordinator, User, Student
 from accounts.views import UserIsCoordinatorMixin, UserIsStudentMixin
+from survey.views import StudentSurveyListView
 from django.views.generic.edit import FormView
 from .models import Campus, Report, Team, File, Offering, Alert, Message
-from survey.models import Question, Rating, Survey, Submission, Evaluation
+from survey.models import Answer, Question, Survey, Submission, Evaluation
 from .forms import CsvForm, ReplyForm
 import csv
 
 # Create your views here.
 
 class DashboardView(LoginRequiredMixin, TemplateView):
-    template_name = 'dashboard.html'
+    print()
+
+
+@login_required
+def dashboard_view(request):
+    if Coordinator.objects.filter(user_id = request.user.id).exists():
+        return render(request, 'coordinator_dashboard.html')
+    elif Student.objects.filter(user_id = request.user.id).exists():
+        return StudentSurveyListView.as_view()(request)
+
+    
 
 
 class CoordinatorAlertListView(UserIsCoordinatorMixin, LoginRequiredMixin, ListView):
@@ -76,6 +87,62 @@ class ReplyFormView(UserIsCoordinatorMixin, LoginRequiredMixin, FormView):
     def form_valid(self, form):
         form.send_email()
         return HttpResponseRedirect(reverse_lazy('coordinator_alert_list_view'))
+
+class StudentAlertListView(UserIsStudentMixin, LoginRequiredMixin, ListView):
+    model = Alert
+    template_name = 'student_alert_list_view.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+
+        coordinator_object = Coordinator.objects.get(user_id = self.request.user.id)
+        alert_objects = coordinator_object.alerts.all()
+
+        student_object = Student.objects.get(user_id = self.request.user.id)
+        alert_objects = Student.alerts.all()
+        context['alert_data'] = []
+
+        for a in alert_objects:
+            alert_data_object = {
+                'alert': a,
+                'student': student_object,
+                'user': User.objects.get(id = student_object.user_id),
+            }
+
+            context['alert_data'].append(alert_data_object)
+
+        return context
+
+class StudentAlertCreateView(UserIsStudentMixin, LoginRequiredMixin, ListView):
+    model = Alert
+    template_name = 'student_alert_create_view.html'
+
+    def get_success_url(self):
+        # Add student alert list view once created in urls.py return reverse_lazy('') 
+        print()
+
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+
+        print()
+    def post(self, request, *args, **kwargs):
+        """Override post() so that question is related to current survey being edited, in addition to just the question object creation."""
+
+        form = self.form_class(request.POST, survey_id = self.kwargs['survey_id'], user = self.request.user)
+        # survey = Survey.objects.get(id=self.kwargs['survey_id'])
+        survey = self.get_object()
+        
+
+        if form.is_valid():
+            questions = form.cleaned_data.get('questions')
+            # for q in questions:
+                # print("q")
+                # survey.questions.add(q)
+                
+            return HttpResponseRedirect(reverse_lazy(self.get_success_url(), kwargs = {'survey_id': survey.id, 'questions': questions}))
+
+    print()
 
 class MessageCreateView(LoginRequiredMixin, CreateView):
     model = Message
@@ -215,7 +282,7 @@ def create_team_report(request, pk):
             evaluations = Evaluation.objects.filter(evaluatee_id=s.id)
             for e in evaluations:
                 evaluation_count += 1
-                ratings = Rating.objects.filter(evaluation_id = e.id)
+                ratings = Answer.objects.filter(evaluation_id = e.id, type = 'R')
                 for r in ratings:
                     q = Question.objects.get(id = r.question_id)
                     weighting = q.weighting
@@ -238,7 +305,7 @@ def create_team_report(request, pk):
             # If student has submitted SPE2, loop through evaluations of student (including self-evaluation) to calculate SPE2 mark
             evaluations = Evaluation.objects.filter(evaluatee_id=s.id)
             for e in evaluations:
-                ratings = Rating.objects.filter(evaluation_id = e.id)
+                ratings = Answer.objects.filter(evaluation_id = e.id, type = 'R')
                 for r in ratings:
                     q = Question.objects.get(id = r.question_id)
                     weighting = q.weighting
@@ -266,6 +333,7 @@ class AllStudentsListView(ListView):
 def student_list(request):
 
     teaching = [] # List of offerings the coordinator is assigned to
+    has_students = False # Boolean indicating whether the Coordinator has any students assigned or not
 
     # List of dictionaries - each dictionary contains data for a given
     # student from both the Student and User models.
@@ -321,20 +389,7 @@ def student_list(request):
                     csv_team_number = row[6]
                     csv_team_name = row[7]
 
-                    # Create User object
-                    u, create = User.objects.get_or_create(
-                            # Concatenate student ID with Murdoch's current student email scheme
-                            email = f"{csv_id_number}@student.murdoch.edu.au",
-                            last_name = csv_last_name,
-                            title = csv_title,
-                            given_names = csv_given_names,
-                    )
-
-                    # Create Student object
-                    s, create = Student.objects.get_or_create(
-                        user = u,
-                        id_number = csv_id_number,
-                    )
+                    
 
                     # Create Campus and Offering units before Team object, as they are required as FKs
                     # Split teaching period and year from column 4 of the csv, which has combined the two
@@ -375,7 +430,7 @@ def student_list(request):
                         year = y,
                         campus = c,
                     )
-                    o.students.add(s)
+                    
 
                     # Add student object to (already created) Team's list of students
                     t, create = Team.objects.get_or_create(
@@ -383,11 +438,30 @@ def student_list(request):
                         team_name = csv_team_name,
                         campus = c,
                         offering = o,)
-                    t.students.add(s)
 
+                    # Create User object
+                    u, create = User.objects.get_or_create(
+                            # Concatenate student ID with Murdoch's current student email scheme
+                            email = f"{csv_id_number}@student.murdoch.edu.au",
+                            last_name = csv_last_name,
+                            title = csv_title,
+                            given_names = csv_given_names,
+                    )
+
+                    # Create Student object
+                    s, create = Student.objects.get_or_create(
+                        user = u,
+                        id_number = csv_id_number,
+                        team_id = t.id
+                    )
+
+                    o.students.add(s)
             obj.save()
-    
-    return render(request, 'student_list.html', {'form': form, 'student_data': student_data})
+
+    if student_data:
+        has_students = True
+
+    return render(request, 'student_list.html', {'form': form, 'student_data': student_data, 'has_students': has_students})
 
 
 

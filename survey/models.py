@@ -100,33 +100,27 @@ class Evaluation(models.Model):
         Submission, on_delete=models.CASCADE, blank=False,
         related_name='evaluations')
 
+    # Choice definition for evaluation type
+    SELF = 'S'
+    PEER = 'P'
+    EVALUATION_TYPE_CHOICES = [
+        (SELF, 'Self Evaluation'),
+        (PEER, 'Peer Evaluation'),
+    ]
+    type = models.CharField(
+        max_length=1, choices=EVALUATION_TYPE_CHOICES, blank=False)
 
-class Rating(models.Model):
 
+class Answer(models.Model):
     class Meta:
-        """Metadata options for the Rating model."""
-        db_table = 'rating'
-
+        """Metadata options for the Answer model."""
+        db_table = 'answer'
+    
     question = models.ForeignKey(
         Question, on_delete=models.CASCADE, blank=False,
-        related_name='ratings')
+        related_name='answers')
     evaluation = models.ForeignKey(
         Evaluation, on_delete=models.CASCADE, blank=False,
-        related_name='ratings')
-    answer = models.PositiveSmallIntegerField()
-
-
-class Comment(models.Model):
-
-    class Meta:
-        """Metadata options for the Comment model."""
-        db_table = 'comment'
-
-
-    question = models.ForeignKey(
-        Question, on_delete=models.CASCADE, blank=False,
-        related_name='comments')
-    evaluation = models.ForeignKey(
-        Evaluation, on_delete=models.CASCADE, blank=False,
-        related_name='comments')
-    answer = models.CharField(max_length=1200)
+        related_name='answers')
+    rating = models.PositiveSmallIntegerField(null=True)
+    comment = models.CharField(max_length=1200, null=True)

@@ -159,7 +159,6 @@ class Team(models.Model):
         null=True,
         related_name='teams')
 
-    students=models.ManyToManyField(Student, related_name='teams')
 
 class Report(models.Model):
     

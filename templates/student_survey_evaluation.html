@@ -1,0 +1,36 @@
+<!-- tempaltes/student_survey_evaluation.html -->
+{% extends 'student_base.html' %}
+{% block content %}
+  <div class="row">
+    <div class="col">
+      <h1 style="font-size: 25px;">Question</h1>
+    </div>
+    <div class="col" style="text-align: center;">
+      <h1 style="font-size: 25px;text-align: center;">Scale</h1>
+    </div>
+  </div>
+  {% for q in questions %}
+    {% if q.question_type = 'R' %}
+      <div class="row">
+        <div class="col-6" style="border-right-width: 5px;border-right-color: grey;">
+          <p>{{ q.prompt }}</p>
+        </div>
+        <div class="col d-lg-flex justify-content-between justify-content-lg-center align-items-lg-center">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="formCheck-1"><label class="form-check-label" for="formCheck-1">1</label></div>
+        </div>
+        <div class="col d-lg-flex justify-content-between justify-content-lg-center align-items-lg-center">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="formCheck-19"><label class="form-check-label" for="formCheck-1">2</label></div>
+        </div>
+        <div class="col d-lg-flex justify-content-between justify-content-lg-center align-items-lg-center">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="formCheck-2"><label class="form-check-label" for="formCheck-1">3</label></div>
+        </div>
+        <div class="col d-lg-flex justify-content-between justify-content-lg-center align-items-lg-center">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="formCheck-4"><label class="form-check-label" for="formCheck-1">4</label></div>
+        </div>
+        <div class="col d-lg-flex justify-content-between justify-content-lg-center align-items-lg-center">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="formCheck-3"><label class="form-check-label" for="formCheck-1">5</label></div>
+        </div>
+      </div>
+
+
+{% endblock content %}

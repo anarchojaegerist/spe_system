@@ -1,0 +1,14 @@
+<!-- templates/delete_survey.html -->
+
+<!-- templates/delete_question.html -->
+
+<form method="post">{% csrf_token %}
+    <p>Are you sure you want to delete the selected Survey with the following attributes:</p>
+      <ul>
+        <li>Survey ID: {{ survey.id }}</li>
+        <li>Survey Title: {{ survey.title }}</li>
+        <li>Introductory Text: {{ survey.introductory_text }}</li>
+        <li>Number of questions: {{survey.questions.count }}</li>
+      </ul>
+      <input type="submit" value="Confirm">
+</form>

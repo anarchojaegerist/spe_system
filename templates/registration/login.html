@@ -1,14 +1,53 @@
 
 <!-- templates/registration/login.html -->
-{% extends 'base.html' %}
-
-{% block title %}Log In{% endblock title %}
-
-{% block content %}
-    <h2>Log In</h2>
-    <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Log In</button>
-    </form>
-{% endblock content %}
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <title>Login</title>
+        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/Login-Form-Clean.css' %}">
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+        <link rel="stylesheet" href="{% static 'fonts/fontawesome-all.min.css' %}">
+        <link rel="stylesheet" href="{% static 'fonts/font-awesome.min.css' %}">
+        <link rel="stylesheet" href="{% static 'fonts/typicons.min.css' %}">
+        <link rel="stylesheet" href="{% static 'fontawesome5-overrides.min.css' %}">
+    </head>
+    
+    <body style="background: rgb(239,237,237);">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-md-6 d-md-flex flex-column justify-content-md-center align-items-md-start" style="padding-top: 25px;">
+                    <h1 class="text-center text-md-start">Student Peer Evaluation Portal</h1>
+                    <p></p>
+                </div>
+                <div class="col">
+                    <section class="login-clean" style="background: transparent;">
+                        <form method="post">
+                            {% csrf_token %}
+                            <h2 class="visually-hidden">Login Form</h2>
+                            <h1 class="text-center">Login</h1>
+                            <div class="illustration"></div>
+                            {% for field in form.visible_fields %}
+                            <div class="mb-3">
+                                {{ field.errors }}
+                                {% if field.name == "username" %}
+                                    <input class="form-control" placeholder="Email" {{ field }}
+                                {% elif field.name == "password" %}
+                                    <input class="form-control" placeholder="Password" {{ field }}
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            <div class="mb-3"><button class="btn btn-primary d-block w-100" type="submit" style="background: rgb(136,132,133);">Log In</button></div><a class="forgot" href="#">Forgot your email or password?</a>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </div>
+        <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    </body>
+    
+    </html>
